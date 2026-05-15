@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { NewsFilters, ArticleWithStats } from '@/lib/types'
+import { ArticleWithStats } from '@/lib/types'
+import { Prisma } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0')
 
     // Build where clause
-    const where: any = {}
+    const where: Prisma.ArticleWhereInput = {}
 
     if (category) {
       where.category = {

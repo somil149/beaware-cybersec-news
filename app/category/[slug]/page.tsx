@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db'
 import ArticleCard from '@/components/ArticleCard'
 import TimeFilter from '@/components/TimeFilter'
 import { notFound } from 'next/navigation'
+import { Prisma } from '@prisma/client'
 
 async function getCategory(slug: string) {
   return prisma.category.findUnique({
@@ -10,7 +11,7 @@ async function getCategory(slug: string) {
 }
 
 async function getArticlesByCategory(categoryId: string, timePeriod?: string) {
-  const where: any = { categoryId }
+  const where: Prisma.ArticleWhereInput = { categoryId }
   
   if (timePeriod) {
     where.timePeriod = timePeriod
@@ -72,7 +73,7 @@ export default async function CategoryPage({
 
         {/* Time Filter */}
         <div className="mb-6">
-          <TimeFilter currentTimePeriod={timePeriod as any} />
+          <TimeFilter currentTimePeriod={timePeriod as '1d' | '7d' | '30d' | undefined} />
         </div>
 
         {/* Articles Grid */}

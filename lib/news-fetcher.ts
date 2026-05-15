@@ -220,7 +220,7 @@ async function scrapeWebsite(source: NewsSource): Promise<ParsedArticle[]> {
   }
 }
 
-function extractImageUrl(item: any): string | undefined {
+function extractImageUrl(item: { enclosure?: { url?: string }; content?: string }): string | undefined {
   if (item.enclosure && item.enclosure.url) {
     return item.enclosure.url
   }
@@ -232,7 +232,7 @@ function extractImageUrl(item: any): string | undefined {
   return undefined
 }
 
-function extractTags(item: any): string[] {
+function extractTags(item: { categories?: string[] }): string[] {
   const tags: string[] = []
   if (item.categories) {
     tags.push(...item.categories)

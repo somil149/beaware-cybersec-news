@@ -187,7 +187,7 @@ export default async function Home({
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                   Filter by Time
                 </h3>
-                <TimeFilter currentTimePeriod={params.timePeriod as any} />
+                <TimeFilter currentTimePeriod={params.timePeriod as '1d' | '7d' | '30d' | undefined} />
               </div>
             </div>
 

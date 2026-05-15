@@ -1,4 +1,4 @@
-import { Article, Category, Source, User } from '@prisma/client'
+import { Article, Category, Source } from '@prisma/client'
 
 export type ArticleWithRelations = Article & {
   category: Category
