@@ -13,7 +13,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "fetch-news": "tsx lib/news-fetcher.ts",
     "db:push": "prisma db push",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
