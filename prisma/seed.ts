@@ -88,7 +88,10 @@ async function main() {
   for (const source of rssSources) {
     await prisma.source.upsert({
       where: { name: source.name },
-      create: source,
+      create: {
+        ...source,
+        type: source.type as any,
+      },
       update: {},
     })
   }
@@ -112,7 +115,10 @@ async function main() {
   for (const source of scrapeSources) {
     await prisma.source.upsert({
       where: { name: source.name },
-      create: source,
+      create: {
+        ...source,
+        type: source.type as any,
+      },
       update: {},
     })
   }
