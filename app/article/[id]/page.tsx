@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
 function formatHtmlContent(html: string): string {
-  // Remove all HTML tags first
+  // Remove all HTML tags
   let text = html.replace(/<[^>]*>/g, '')
   
   // Decode HTML entities
@@ -19,28 +19,16 @@ function formatHtmlContent(html: string): string {
     .replace(/&ndash;/g, '–')
     .replace(/&hellip;/g, '...')
   
-  // Clean up multiple spaces
-  text = text.replace(/[ \t]+/g, ' ')
+  // Clean up multiple spaces and newlines
+  text = text.replace(/[ \t]+/g, ' ').replace(/\n+/g, ' ')
   
-  // Split into sentences and group into paragraphs
-  const sentences = text.split(/(?<=[.!?])\s+/)
-  const paragraphs: string[] = []
-  let currentParagraph = ''
+  // Add paragraph breaks after sentences for better readability
+  text = text.replace(/([.!?])\s+/g, '$1\n\n')
   
-  for (const sentence of sentences) {
-    if (currentParagraph.length + sentence.length > 300 && currentParagraph.length > 0) {
-      paragraphs.push(currentParagraph.trim())
-      currentParagraph = sentence
-    } else {
-      currentParagraph += (currentParagraph ? ' ' : '') + sentence
-    }
-  }
+  // Clean up excessive paragraph breaks
+  text = text.replace(/\n{3,}/g, '\n\n')
   
-  if (currentParagraph.trim()) {
-    paragraphs.push(currentParagraph.trim())
-  }
-  
-  return paragraphs.join('\n\n')
+  return text.trim()
 }
 
 async function getArticle(id: string) {
