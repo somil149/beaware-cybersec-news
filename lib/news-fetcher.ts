@@ -99,6 +99,62 @@ const SCRAPE_SOURCES: NewsSource[] = [
   },
 ]
 
+async function fetchArticleContent(url: string): Promise<string> {
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      },
+      timeout: 10000, // 10 second timeout
+    })
+
+    const $ = cheerio.load(response.data)
+
+    // Remove unwanted elements
+    $('script, style, nav, footer, header, aside, .ad, .advertisement, .sidebar, .comments').remove()
+
+    // Try different content selectors
+    const contentSelectors = [
+      'article',
+      '.article-content',
+      '.post-content',
+      '.entry-content',
+      '.content',
+      'main',
+      '.main-content',
+      '[role="main"]',
+    ]
+
+    let content = ''
+    for (const selector of contentSelectors) {
+      const element = $(selector).first()
+      if (element.length > 0) {
+        content = element.text().trim()
+        if (content.length > 200) {
+          break // Found substantial content
+        }
+      }
+    }
+
+    // If no content found, try paragraph tags
+    if (content.length < 200) {
+      const paragraphs = $('p').map((_, el) => $(el).text().trim()).get()
+      content = paragraphs.join('\n\n')
+    }
+
+    // Clean up the content
+    content = content
+      .replace(/\s+/g, ' ') // Remove extra whitespace
+      .replace(/\n\s*\n/g, '\n\n') // Fix line breaks
+      .trim()
+
+    return content
+  } catch (error) {
+    console.error(`Error fetching article content from ${url}:`, error)
+    return ''
+  }
+}
+
 async function fetchRSSFeed(source: NewsSource): Promise<ParsedArticle[]> {
   try {
     const feed = await parser.parseURL(source.url)
@@ -107,11 +163,25 @@ async function fetchRSSFeed(source: NewsSource): Promise<ParsedArticle[]> {
     for (const item of feed.items) {
       if (!item.link) continue
 
+      // Get content from RSS, but if it's too short, try to fetch full content
+      let content = item.content || ''
+      const summary = item.contentSnippet || item.content || ''
+
+      // If RSS content is very short (< 500 chars), try to fetch full article content
+      if (content.length < 500 && item.link) {
+        try {
+          content = await fetchArticleContent(item.link)
+        } catch (error) {
+          console.log(`Could not fetch full content for ${item.title}, using RSS content`)
+          content = item.content || ''
+        }
+      }
+
       articles.push({
         title: item.title || '',
         url: item.link,
-        summary: item.contentSnippet || item.content || '',
-        content: item.content || '',
+        summary: summary,
+        content: content,
         publishedAt: item.pubDate ? new Date(item.pubDate) : new Date(),
         author: item.creator || item.author || source.name,
         imageUrl: extractImageUrl(item),
@@ -162,11 +232,25 @@ async function fetchFromNewsAPI(): Promise<ParsedArticle[]> {
       for (const article of response.data.articles) {
         if (!article.url) continue
 
+        // Get content from NewsAPI, but if it's too short, try to fetch full content
+        let content = article.content || ''
+        const summary = article.description || ''
+
+        // If NewsAPI content is very short (< 500 chars), try to fetch full article content
+        if (content.length < 500 && article.url) {
+          try {
+            content = await fetchArticleContent(article.url)
+          } catch (error) {
+            console.log(`Could not fetch full content for ${article.title}, using NewsAPI content`)
+            content = article.content || ''
+          }
+        }
+
         articles.push({
           title: article.title || '',
           url: article.url,
-          summary: article.description || '',
-          content: article.content || '',
+          summary: summary,
+          content: content,
           publishedAt: article.publishedAt ? new Date(article.publishedAt) : new Date(),
           author: article.author || 'NewsAPI',
           imageUrl: article.urlToImage,
