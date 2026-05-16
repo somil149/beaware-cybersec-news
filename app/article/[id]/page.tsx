@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db'
 import { formatRelativeTime, formatDate } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import parse from 'html-react-parser'
 
 async function getArticle(id: string) {
   return prisma.article.findUnique({
@@ -99,7 +100,7 @@ export default async function ArticlePage({
         )}
 
         {/* Article Content */}
-        <div className="prose dark:prose-invert max-w-none mb-8">
+        <div className="mb-8">
           {article.summary && (
             <div className="text-xl text-gray-700 dark:text-gray-300 mb-6 italic border-l-4 border-blue-500 pl-4">
               {article.summary}
@@ -107,8 +108,8 @@ export default async function ArticlePage({
           )}
 
           {article.content ? (
-            <div className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-              {article.content}
+            <div className="text-gray-800 dark:text-gray-200 prose prose-lg dark:prose-invert max-w-none">
+              {parse(article.content)}
             </div>
           ) : (
             <div className="text-gray-600 dark:text-gray-400">
