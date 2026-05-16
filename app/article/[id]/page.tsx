@@ -5,13 +5,25 @@ import Link from 'next/link'
 
 function formatHtmlContent(html: string): string {
   // Remove HTML tags but preserve paragraph structure
-  const text = html
-    // Replace block elements with newlines
+  let text = html
+    // Replace closing paragraph tags with newlines first
     .replace(/<\/p>/gi, '\n\n')
-    .replace(/<\/div>/gi, '\n\n')
-    .replace(/<\/h[1-6]>/gi, '\n\n')
+    // Replace other block elements
+    .replace(/<\/div>/gi, '\n')
     .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
     .replace(/<\/li>/gi, '\n')
+    // Remove opening block tags (but keep content)
+    .replace(/<p[^>]*>/gi, '')
+    .replace(/<div[^>]*>/gi, '')
+    .replace(/<h[1-6][^>]*>/gi, '')
+    .replace(/<li[^>]*>/gi, '')
+    // Remove span and other inline tags
+    .replace(/<\/?span[^>]*>/gi, '')
+    .replace(/<\/?strong[^>]*>/gi, '')
+    .replace(/<\/?em[^>]*>/gi, '')
+    .replace(/<\/?b[^>]*>/gi, '')
+    .replace(/<\/?i[^>]*>/gi, '')
     // Remove all remaining HTML tags
     .replace(/<[^>]*>/g, '')
     // Decode HTML entities
@@ -21,8 +33,9 @@ function formatHtmlContent(html: string): string {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    // Clean up multiple consecutive newlines
+    // Clean up multiple consecutive newlines and spaces
     .replace(/\n{3,}/g, '\n\n')
+    .replace(/[ \t]+/g, ' ')
     // Trim whitespace
     .trim()
   
