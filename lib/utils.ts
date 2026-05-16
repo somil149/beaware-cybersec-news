@@ -7,6 +7,9 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatDate(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(d.getTime())) {
+    return 'Invalid date'
+  }
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
@@ -39,8 +42,9 @@ export function getTimePeriod(date: Date | string): '1d' | '7d' | '30d' | null {
 }
 
 export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.substring(0, maxLength).trim() + '...'
+  const trimmed = text.trim()
+  if (trimmed.length <= maxLength) return trimmed
+  return trimmed.substring(0, maxLength).trim() + '...'
 }
 
 export function slugify(text: string): string {
