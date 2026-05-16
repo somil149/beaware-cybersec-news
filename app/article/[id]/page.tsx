@@ -4,40 +4,43 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
 function formatHtmlContent(html: string): string {
-  // Remove HTML tags but preserve paragraph structure
-  return html
-    // Replace closing paragraph tags with newlines first
-    .replace(/<\/p>/gi, '\n\n')
-    // Replace other block elements
-    .replace(/<\/div>/gi, '\n')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/h[1-6]>/gi, '\n\n')
-    .replace(/<\/li>/gi, '\n')
-    // Remove opening block tags (but keep content)
-    .replace(/<p[^>]*>/gi, '')
-    .replace(/<div[^>]*>/gi, '')
-    .replace(/<h[1-6][^>]*>/gi, '')
-    .replace(/<li[^>]*>/gi, '')
-    // Remove span and other inline tags
-    .replace(/<\/?span[^>]*>/gi, '')
-    .replace(/<\/?strong[^>]*>/gi, '')
-    .replace(/<\/?em[^>]*>/gi, '')
-    .replace(/<\/?b[^>]*>/gi, '')
-    .replace(/<\/?i[^>]*>/gi, '')
-    // Remove all remaining HTML tags
-    .replace(/<[^>]*>/g, '')
-    // Decode HTML entities
+  // Remove all HTML tags first
+  let text = html.replace(/<[^>]*>/g, '')
+  
+  // Decode HTML entities
+  text = text
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    // Clean up multiple consecutive newlines and spaces
-    .replace(/\n{3,}/g, '\n\n')
-    .replace(/[ \t]+/g, ' ')
-    // Trim whitespace
-    .trim()
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    .replace(/&hellip;/g, '...')
+  
+  // Clean up multiple spaces
+  text = text.replace(/[ \t]+/g, ' ')
+  
+  // Split into sentences and group into paragraphs
+  const sentences = text.split(/(?<=[.!?])\s+/)
+  const paragraphs: string[] = []
+  let currentParagraph = ''
+  
+  for (const sentence of sentences) {
+    if (currentParagraph.length + sentence.length > 300 && currentParagraph.length > 0) {
+      paragraphs.push(currentParagraph.trim())
+      currentParagraph = sentence
+    } else {
+      currentParagraph += (currentParagraph ? ' ' : '') + sentence
+    }
+  }
+  
+  if (currentParagraph.trim()) {
+    paragraphs.push(currentParagraph.trim())
+  }
+  
+  return paragraphs.join('\n\n')
 }
 
 async function getArticle(id: string) {
