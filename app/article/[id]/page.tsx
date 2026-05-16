@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 function formatHtmlContent(html: string): string {
   // Remove HTML tags but preserve paragraph structure
-  let text = html
+  return html
     // Replace closing paragraph tags with newlines first
     .replace(/<\/p>/gi, '\n\n')
     // Replace other block elements
@@ -38,8 +38,6 @@ function formatHtmlContent(html: string): string {
     .replace(/[ \t]+/g, ' ')
     // Trim whitespace
     .trim()
-  
-  return text
 }
 
 async function getArticle(id: string) {
