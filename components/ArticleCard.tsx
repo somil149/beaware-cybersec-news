@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArticleWithStats } from '@/lib/types'
 import { formatRelativeTime } from '@/lib/utils'
+import ArticleImage from './ArticleImage'
 
 interface ArticleCardProps {
   article: ArticleWithStats
@@ -9,24 +10,7 @@ interface ArticleCardProps {
 export default function ArticleCard({ article }: ArticleCardProps) {
   return (
     <article className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden flex flex-col min-h-[300px]">
-      {article.imageUrl ? (
-        <div className="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-700">
-          <img
-            src={article.imageUrl}
-            alt={article.title}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none'
-            }}
-          />
-        </div>
-      ) : (
-        <div className="aspect-video w-full bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-          <svg className="w-12 h-12 text-blue-400 dark:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 012-2m-6 0l-2 2m2-2l-2 2m2 2l2-2" />
-          </svg>
-        </div>
-      )}
+      <ArticleImage src={article.imageUrl} alt={article.title} />
       <div className="p-6 flex flex-col flex-grow">
         <div className="flex items-center gap-2 mb-3">
           <span className="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
