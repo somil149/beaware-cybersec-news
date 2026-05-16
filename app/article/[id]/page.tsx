@@ -2,7 +2,32 @@ import { prisma } from '@/lib/db'
 import { formatRelativeTime, formatDate } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import parse from 'html-react-parser'
+
+function formatHtmlContent(html: string): string {
+  // Remove HTML tags but preserve paragraph structure
+  let text = html
+    // Replace block elements with newlines
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/div>/gi, '\n\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    // Remove all remaining HTML tags
+    .replace(/<[^>]*>/g, '')
+    // Decode HTML entities
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    // Clean up multiple consecutive newlines
+    .replace(/\n{3,}/g, '\n\n')
+    // Trim whitespace
+    .trim()
+  
+  return text
+}
 
 async function getArticle(id: string) {
   return prisma.article.findUnique({
@@ -109,7 +134,9 @@ export default async function ArticlePage({
 
           {article.content ? (
             <div className="text-gray-800 dark:text-gray-200 prose prose-lg dark:prose-invert max-w-none">
-              {parse(article.content)}
+              {formatHtmlContent(article.content).split('\n\n').map((paragraph, index) => (
+                <p key={index} className="mb-4">{paragraph}</p>
+              ))}
             </div>
           ) : (
             <div className="text-gray-600 dark:text-gray-400">
