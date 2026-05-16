@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 function formatHtmlContent(html: string): string {
   // Remove HTML tags but preserve paragraph structure
-  let text = html
+  const text = html
     // Replace block elements with newlines
     .replace(/<\/p>/gi, '\n\n')
     .replace(/<\/div>/gi, '\n\n')
